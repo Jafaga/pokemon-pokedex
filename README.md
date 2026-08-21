@@ -1,100 +1,161 @@
-# vinext-starter
+# Kanto Pokédex
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+An interactive field guide to all 151 Pokémon from the original **Pokémon Red, Blue, and Yellow** games. Browse the complete Kanto index, search by name or Pokédex number, filter by type, inspect stats and abilities, and play each Pokémon's cry.
 
-## Prerequisites
+## Live app
 
-- Node.js `>=22.13.0`
+- **Vercel:** [pokemon-pokedex-sigma-six.vercel.app](https://pokemon-pokedex-sigma-six.vercel.app)
+- **OpenAI Sites:** [kanto-151-pokedex.afagajustine.chatgpt.site](https://kanto-151-pokedex.afagajustine.chatgpt.site)
 
-## Quick Start
+The Vercel project is connected to this GitHub repository. Merges into `main` automatically trigger a new production deployment. The OpenAI Sites deployment is separate and is not automatically updated by GitHub pushes.
+
+## Features
+
+- Complete National Pokédex entries **#001–#151**
+- Search by Pokémon name or Pokédex number
+- Type filters for quick browsing
+- Original pixel sprites in the index
+- Official artwork in the specimen panel
+- Red, Blue, or Yellow Pokédex descriptions where available
+- Height, weight, habitat, growth rate, and capture rate
+- Abilities, types, and all six base stats
+- Pokémon cry playback
+- Previous/next navigation and left/right keyboard shortcuts
+- Responsive layouts for desktop, tablet, and mobile
+- Accessible labels, keyboard controls, reduced-motion support, and descriptive image text
+
+## Data sources and attribution
+
+This project uses the following public resources:
+
+- [Pokémon Database — Red, Blue & Yellow Pokédex](https://pokemondb.net/pokedex/game/red-blue-yellow) for the Kanto game roster and reference information.
+- [PokéAPI](https://pokeapi.co/) and the [PokéAPI v2 endpoints](https://pokeapi.co/docs/v2) for structured Pokémon data, species descriptions, types, abilities, measurements, habitats, base stats, artwork, and cries.
+- [PokéAPI Sprites](https://github.com/PokeAPI/sprites) for the pixel sprite assets displayed in the index.
+
+Data is requested in the visitor's browser when a Pokémon is selected. No API key is required.
+
+Pokémon and Pokémon character names are trademarks of Nintendo, Game Freak, and The Pokémon Company. This is an unofficial fan project and is not affiliated with or endorsed by those companies.
+
+## How the app works
+
+The app keeps the original 151-species roster locally so the index appears immediately. When an entry is opened, the browser requests two PokéAPI resources in parallel:
+
+1. `/api/v2/pokemon/{id}` supplies types, abilities, measurements, stats, sprites, artwork, and cries.
+2. `/api/v2/pokemon-species/{id}` supplies the genus, habitat, growth rate, capture rate, and game-specific flavor text.
+
+The interface is built with React and TypeScript. The repository contains two build targets that share the same page and stylesheet:
+
+- **OpenAI Sites / Cloudflare:** built with vinext and the Cloudflare Vite plugin.
+- **Vercel:** built as a client-side Vite application from `vercel/`.
+
+## Technology
+
+- React 19
+- TypeScript
+- Vite / vinext
+- Tailwind CSS processing with custom CSS
+- PokéAPI
+- Vercel and OpenAI Sites hosting
+
+## Local development
+
+### Requirements
+
+- Node.js 22.13 or newer
+- npm
+
+### Install and run
 
 ```bash
+git clone https://github.com/Jafaga/pokemon-pokedex.git
+cd pokemon-pokedex
 npm install
 npm run dev
+```
+
+Open the local address printed in the terminal. The development command runs the vinext/OpenAI Sites version with live reloading.
+
+## Build and validation commands
+
+```bash
+# Build the OpenAI Sites / Cloudflare version
 npm run build
+
+# Build the Vercel-compatible static version
+npm run build:vercel
+
+# Run the existing project test command
+npm test
+
+# Run ESLint
+npm run lint
 ```
 
-This starter does not use `wrangler.jsonc`.
+Generated output is written to `dist/` for Sites and `vercel-dist/` for Vercel. Both directories are ignored by Git.
 
-## Included Shape
+## Project structure
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```text
+app/
+  page.tsx             Main Pokédex interface and data-fetching logic
+  globals.css          Complete responsive visual design
+  layout.tsx           Sites metadata and font configuration
+public/
+  og.png               Social sharing image
+vercel/
+  index.html           Vercel HTML entry point and metadata
+  src/main.tsx         Vercel React entry point
+.openai/hosting.json   OpenAI Sites project configuration
+vercel.json            Vercel build and routing configuration
+vite.config.ts         vinext / Cloudflare build configuration
+vite.vercel.config.ts  Vercel-specific Vite build configuration
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+## Making and publishing changes
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+Editing a local file does not change the live site by itself. Use a branch and pull request:
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+```bash
+git switch main
+git pull origin main
+git switch -c codex/describe-your-change
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+# Edit and test the project, then:
+git add path/to/changed-file
+git commit -m "Describe the change"
+git push -u origin codex/describe-your-change
+```
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+Open a pull request on GitHub. Vercel creates a preview deployment for the branch. Once the pull request is reviewed and merged into `main`, Vercel automatically publishes the production update.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+For a very small direct update, a push to `main` will also deploy production, but a branch and preview are safer.
 
-## Useful Commands
+## Configuration notes
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+- No secrets or environment variables are currently required.
+- PokéAPI availability and the visitor's network connection affect live details and audio.
+- The type-filter index uses lightweight local hints for fast initial filtering; complete types are always shown in the selected Pokémon's details.
+- Browser audio policies may require the visitor to click the cry button before sound can play.
+- The app is a single-page client interface on Vercel; `vercel.json` rewrites routes to `index.html`.
 
-## Learn More
+## Troubleshooting
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+### Pokémon details do not load
+
+Check the internet connection and confirm [pokeapi.co](https://pokeapi.co/) is reachable. The app displays a retry option when a request fails.
+
+### A cry does not play
+
+Make sure the browser tab is not muted, the device volume is enabled, and playback was started by clicking the sound button.
+
+### A Vercel deployment fails
+
+Confirm `npm run build:vercel` succeeds locally and that `package.json`, `vercel.json`, and `vite.vercel.config.ts` were committed together.
+
+### The GitHub update is not live
+
+Confirm the change was merged into `main`, then check the Vercel deployment status. Branch pushes create previews rather than replacing production.
+
+## License and use
+
+No open-source license has been added. Unless a license is added later, the source remains available for viewing but no additional reuse rights are granted. Third-party Pokémon data and assets remain subject to their respective owners and source terms.
