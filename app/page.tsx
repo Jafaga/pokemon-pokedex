@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+// These types describe only the PokéAPI fields the interface reads. Keeping the
+// shapes small makes it easier to see which API data drives each screen section.
 type Pokemon = {
   id: number;
   name: string;
@@ -22,10 +24,13 @@ type Species = {
   capture_rate: number;
 };
 
+// The Pokédex is intentionally limited to the original 151 Pokémon. This local
+// list lets the grid render immediately while detailed records load on demand.
 const names = [
   "bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie","metapod","butterfree","weedle","kakuna","beedrill","pidgey","pidgeotto","pidgeot","rattata","raticate","spearow","fearow","ekans","arbok","pikachu","raichu","sandshrew","sandslash","nidoran-f","nidorina","nidoqueen","nidoran-m","nidorino","nidoking","clefairy","clefable","vulpix","ninetales","jigglypuff","wigglytuff","zubat","golbat","oddish","gloom","vileplume","paras","parasect","venonat","venomoth","diglett","dugtrio","meowth","persian","psyduck","golduck","mankey","primeape","growlithe","arcanine","poliwag","poliwhirl","poliwrath","abra","kadabra","alakazam","machop","machoke","machamp","bellsprout","weepinbell","victreebel","tentacool","tentacruel","geodude","graveler","golem","ponyta","rapidash","slowpoke","slowbro","magnemite","magneton","farfetchd","doduo","dodrio","seel","dewgong","grimer","muk","shellder","cloyster","gastly","haunter","gengar","onix","drowzee","hypno","krabby","kingler","voltorb","electrode","exeggcute","exeggutor","cubone","marowak","hitmonlee","hitmonchan","lickitung","koffing","weezing","rhyhorn","rhydon","chansey","tangela","kangaskhan","horsea","seadra","goldeen","seaking","staryu","starmie","mr-mime","scyther","jynx","electabuzz","magmar","pinsir","tauros","magikarp","gyarados","lapras","ditto","eevee","vaporeon","jolteon","flareon","porygon","omanyte","omastar","kabuto","kabutops","aerodactyl","snorlax","articuno","zapdos","moltres","dratini","dragonair","dragonite","mewtwo","mew"
 ];
 
+// Type colors are shared by the detail-panel badges.
 const typeColors: Record<string, string> = {
   normal: "#8a8b78", fire: "#e45b35", water: "#3a7cc8", electric: "#e3ad28",
   grass: "#5b9b55", ice: "#57aeb0", fighting: "#b54a3d", poison: "#8d5b9d",
@@ -34,12 +39,16 @@ const typeColors: Record<string, string> = {
   steel: "#8d96a3", fairy: "#bd7f9e"
 };
 
+// Common type hints make the first filter interaction instant. The selected
+// Pokémon's complete type data is supplemented from PokéAPI after it loads.
 const typeHints: Record<number, string[]> = {
   1:["grass","poison"],2:["grass","poison"],3:["grass","poison"],4:["fire"],5:["fire"],6:["fire","flying"],
   7:["water"],8:["water"],9:["water"],25:["electric"],94:["ghost","poison"],130:["water","flying"],
   131:["water","ice"],133:["normal"],144:["ice","flying"],145:["electric","flying"],146:["fire","flying"],150:["psychic"],151:["psychic"]
 };
 
+// Small display helpers keep API slugs, Pokédex numbers, and sprite URLs
+// consistent throughout the index and detail panel.
 const format = (value: string) => value.replaceAll("-", " ").replace(/\b\w/g, c => c.toUpperCase());
 const pad = (id: number) => String(id).padStart(3, "0");
 const sprite = (id: number) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -49,6 +58,8 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 export default function Home() {
+  // UI state is kept together here because the index and detail panel update as
+  // one interactive Pokédex rather than as separate routes.
   const [selected, setSelected] = useState(25);
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [species, setSpecies] = useState<Species | null>(null);
@@ -57,6 +68,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Pokémon and species endpoints contain complementary data, so fetch them in
+  // parallel whenever an entry is selected.
   const loadPokemon = useCallback(async (id: number) => {
     setSelected(id); setLoading(true); setError("");
     try {
@@ -70,6 +83,8 @@ export default function Home() {
     } finally { setLoading(false); }
   }, []);
 
+  // Pikachu is the opening entry. Arrow keys provide quick desktop navigation,
+  // but are ignored while a visitor is typing in the search field.
   useEffect(() => { loadPokemon(25); }, [loadPokemon]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -80,17 +95,23 @@ export default function Home() {
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
   }, [selected, loadPokemon]);
 
+  // Derive the visible index from search and type controls instead of storing a
+  // second copy of the Pokémon list in state.
   const visible = useMemo(() => names.map((name, i) => ({ name, id: i + 1 })).filter(p => {
     const searchMatch = p.name.includes(query.toLowerCase().trim()) || String(p.id) === query.trim().replace(/^#/, "");
     const typeMatch = filter === "all" || (typeHints[p.id] || []).includes(filter) || (p.id === selected && pokemon?.types.some(t => t.type.name === filter));
     return searchMatch && typeMatch;
   }), [query, filter, selected, pokemon]);
 
+  // Prefer original Red/Blue/Yellow flavor text, then fall back to any English
+  // entry so every Pokémon still has a useful description.
   const description = species?.flavor_text_entries.find(x => x.language.name === "en" && ["red", "blue", "yellow"].includes(x.version.name))
     || species?.flavor_text_entries.find(x => x.language.name === "en");
   const genus = species?.genera.find(g => g.language.name === "en")?.genus;
   const total = pokemon?.stats.reduce((sum, s) => sum + s.base_stat, 0) || 0;
 
+  // Browsers can block audio until a user interacts with the page, which is why
+  // cries are played only from the explicit speaker button.
   const playCry = () => {
     const url = pokemon?.cries?.legacy || pokemon?.cries?.latest;
     if (url) new Audio(url).play().catch(() => undefined);
@@ -98,6 +119,7 @@ export default function Home() {
 
   return (
     <main>
+      {/* Persistent tools: project identity, search, and generation label. */}
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Kanto Pokédex home">
           <span className="brand-ball"><i /></span><span>KANTO</span><b>POKÉDEX</b>
@@ -107,12 +129,14 @@ export default function Home() {
       </header>
 
       <section className="workspace" id="top">
+        {/* Compact desktop navigation rail; hidden on smaller screens by CSS. */}
         <aside className="rail">
           <div><span className="eyebrow">REGION</span><strong>KANTO</strong><small>001—151</small></div>
           <nav aria-label="Pokédex sections"><a className="active" href="#index">⌗ <span>Pokédex</span></a><a href="#details">◫ <span>Details</span></a><a href="#about">? <span>About</span></a></nav>
           <div className="rail-foot"><div className="mini-ball"/><span>OAK<br/>RESEARCH<br/>LAB</span></div>
         </aside>
 
+        {/* Searchable and filterable index of all 151 Kanto Pokémon. */}
         <section className="index" id="index">
           <div className="section-head"><div><span className="eyebrow">NATIONAL INDEX</span><h1>All Pokémon</h1></div><span className="count">{visible.length} / 151</span></div>
           <div className="filters" role="group" aria-label="Filter by type">
@@ -129,6 +153,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Live specimen file populated by the two PokéAPI responses. */}
         <aside className="detail" id="details" aria-live="polite">
           <div className="detail-top"><span className="eyebrow">SPECIMEN FILE</span><span className="detail-id">#{pad(selected)}</span></div>
           {loading && !pokemon ? <div className="loading">Scanning specimen…</div> : error ? <div className="error">{error}<button onClick={() => loadPokemon(selected)}>Retry scan</button></div> : pokemon && <>
@@ -147,6 +172,7 @@ export default function Home() {
         </aside>
       </section>
 
+      {/* Data-source attribution and the keyboard-navigation reminder. */}
       <footer id="about"><p>Field data sourced from <a href="https://pokemondb.net/pokedex/game/red-blue-yellow" target="_blank" rel="noreferrer">Pokémon Database</a> and <a href="https://pokeapi.co" target="_blank" rel="noreferrer">PokéAPI</a>.</p><p>Use ← → to move between entries</p></footer>
     </main>
   );

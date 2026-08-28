@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// next/font downloads and self-hosts these files during the Sites build. CSS
+// fallbacks in globals.css keep the separate client-only Vercel build portable.
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -12,6 +14,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Shared page metadata supplies search snippets, browser icons, and link-preview
+// artwork for hosts that render the Next-compatible application shell.
 export const metadata: Metadata = {
   title: "Kanto Pokédex — Red, Blue & Yellow",
   description: "Explore all 151 original Pokémon with sprites, types, stats, abilities and cries.",
@@ -38,6 +42,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Font variables are placed on the body so all descendant components can use
+  // the same sans-serif and monospace tokens from globals.css.
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
