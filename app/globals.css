@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Design tokens and shared browser defaults. */
 :root { --ink:#25251f; --muted:#77766a; --paper:#f6f3e9; --line:#d8d3c5; --red:#c63d36; --yellow:#e6b74c; --font-geist-sans:Arial,Helvetica,sans-serif; --font-geist-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
@@ -7,6 +8,8 @@ body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--fo
 button,input { font:inherit; }
 button,a { -webkit-tap-highlight-color:transparent; }
 .eyebrow { font-family:var(--font-geist-mono); font-size:10px; letter-spacing:.18em; color:var(--muted); font-weight:700; }
+
+/* Sticky header, branding, search field, and game-edition marker. */
 .topbar { height:76px; display:grid; grid-template-columns:250px minmax(260px,520px) 1fr; align-items:center; gap:40px; border-bottom:1px solid var(--line); padding:0 34px; position:sticky; top:0; z-index:20; background:rgba(246,243,233,.96); backdrop-filter:blur(14px); }
 .brand { color:var(--ink); text-decoration:none; display:flex; align-items:center; gap:7px; letter-spacing:.12em; font-size:12px; }
 .brand b { color:var(--red); font-size:15px; }
@@ -19,6 +22,8 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .edition { justify-self:end; font-family:var(--font-geist-mono); font-size:9px; letter-spacing:.12em; display:flex; gap:9px; align-items:center; }
 .edition i { width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px #ead1cd; }
 .edition span { background:var(--ink); color:var(--paper); padding:5px 7px; border-radius:2px; }
+
+/* Three-column desktop shell and the Oak Research Lab navigation rail. */
 .workspace { min-height:calc(100vh - 76px); display:grid; grid-template-columns:90px minmax(490px,1fr) minmax(365px,470px); }
 .rail { border-right:1px solid var(--line); padding:30px 18px 22px; display:flex; flex-direction:column; align-items:center; position:sticky; top:76px; height:calc(100vh - 76px); }
 .rail>div:first-child { text-align:center; }
@@ -30,6 +35,8 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .rail nav a.active { color:#fff;background:var(--red);box-shadow:0 7px 15px rgba(128,39,33,.18); }
 .rail-foot { width:74px; margin-top:auto; display:flex; flex-direction:column; align-items:center; gap:7px; font:7px/1.45 var(--font-geist-mono); letter-spacing:.08em; text-align:center; white-space:nowrap; }
 .mini-ball { width:23px;height:23px;border-width:2px;filter:grayscale(1);opacity:.7; }
+
+/* Pokémon index heading, type filters, and selectable card grid. */
 .index { padding:42px 34px 60px; min-width:0; }
 .section-head { display:flex; align-items:flex-end; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:19px; }
 h1,h2 { font-family:Georgia,"Times New Roman",serif; margin:4px 0 0; font-weight:600; }
@@ -49,6 +56,8 @@ h1 { font-size:35px; letter-spacing:-.03em; }
 .poke-card .dot { position:absolute; right:7px;top:7px;width:4px;height:4px;border-radius:50%;background:#c4bfae; }
 .poke-card.selected .dot { background:var(--red); }
 .no-results { grid-column:1/-1; text-align:center; padding:70px 20px; color:var(--muted); }
+
+/* Selected Pokémon specimen panel: artwork, measurements, stats, and paging. */
 .detail { background:#ebe6d9; border-left:1px solid var(--line); min-height:calc(100vh - 76px); padding:30px 32px 26px; position:sticky; top:76px; height:calc(100vh - 76px); overflow:auto; }
 .detail-top { display:flex; justify-content:space-between; align-items:center; }
 .detail-id { font:12px var(--font-geist-mono); color:var(--muted); }
@@ -80,10 +89,19 @@ h3 { margin:0;font:700 9px var(--font-geist-mono);letter-spacing:.12em; }
 .pager button,.error button { border:0;background:transparent;cursor:pointer;font:9px var(--font-geist-mono);letter-spacing:.12em;padding:8px 0; }
 .pager button:hover { color:var(--red); }.pager button span{color:var(--muted);margin:0 6px;}
 .loading,.error { padding:80px 0;text-align:center;color:var(--muted);font:11px var(--font-geist-mono);line-height:1.8; }.error button{display:block;margin:15px auto;color:var(--red);}
+
+/* Source attribution and interaction hint below the main workspace. */
 footer { min-height:60px;border-top:1px solid var(--line);padding:18px 34px 18px 124px;display:flex;justify-content:space-between;color:var(--muted);font:9px var(--font-geist-mono); }
 footer a { color:var(--ink); }
 
+/* Tablet: narrow the rail/detail panel and reduce the card grid to three columns. */
 @media (max-width:1050px) { .workspace{grid-template-columns:76px 1fr 390px}.grid{grid-template-columns:repeat(3,1fr)}.detail{padding:28px 24px}.topbar{grid-template-columns:210px 1fr}.edition{display:none}.hero-image{height:230px}.hero-image img{width:205px;height:205px} }
+
+/* Small screens: stack the index and details, and replace the desktop rail. */
 @media (max-width:800px) { .topbar{height:auto;min-height:70px;padding:13px 18px;grid-template-columns:1fr}.brand{display:none}.search{width:100%}.workspace{display:block}.rail{display:none}.index{padding:28px 18px}.detail{position:relative;top:auto;height:auto;min-height:0;border-left:0;border-top:1px solid var(--line);padding:28px 22px}.grid{grid-template-columns:repeat(4,1fr)}footer{padding:18px;display:block;line-height:1.7}.topbar{position:relative} }
+
+/* Phones: balance card density and allow fact fields to wrap cleanly. */
 @media (max-width:520px) { .grid{grid-template-columns:repeat(3,1fr)}.poke-card{padding:6px}.poke-card strong{font-size:9px}.hero-image{height:250px}h1{font-size:30px}.filters{margin-right:-18px}.facts{grid-template-columns:1fr 1fr}.facts div:first-child{grid-column:1/-1} }
+
+/* Respect the operating system's reduced-motion accessibility preference. */
 @media (prefers-reduced-motion:reduce) { *{scroll-behavior:auto!important;transition:none!important} }
