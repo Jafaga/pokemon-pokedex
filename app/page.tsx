@@ -79,7 +79,44 @@ export default function Home() {
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bootState, setBootState] = useState<"idle" | "booting" | "ready">("idle");
   const region = regions[regionKey];
+
+  // A brief Web Audio sequence gives the boot screen its own original device
+  // sound without requiring a copyrighted audio file or an extra download.
+  const powerOn = () => {
+    if (bootState !== "idle") return;
+    setBootState("booting");
+
+    try {
+      const audio = new AudioContext();
+      const master = audio.createGain();
+      master.gain.setValueAtTime(0.0001, audio.currentTime);
+      master.gain.exponentialRampToValueAtTime(0.16, audio.currentTime + 0.03);
+      master.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 1.55);
+      master.connect(audio.destination);
+
+      [196, 294, 392, 587, 784].forEach((frequency, index) => {
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        const start = audio.currentTime + index * 0.16;
+        oscillator.type = index < 3 ? "square" : "sine";
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(index === 4 ? 0.38 : 0.22, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + (index === 4 ? 0.55 : 0.12));
+        oscillator.connect(gain).connect(master);
+        oscillator.start(start);
+        oscillator.stop(start + (index === 4 ? 0.58 : 0.14));
+      });
+
+      window.setTimeout(() => audio.close(), 1800);
+    } catch {
+      // The visual boot sequence still completes if Web Audio is unavailable.
+    }
+
+    window.setTimeout(() => setBootState("ready"), 2100);
+  };
 
   const switchRegion = (next: RegionKey) => {
     if (next === regionKey) return;
@@ -144,6 +181,21 @@ export default function Home() {
 
   return (
     <main style={{ "--red": region.accent, "--accent-soft": region.accentSoft } as React.CSSProperties}>
+      {bootState !== "ready" && <section className={`boot-screen ${bootState}`} aria-label="Pokédex startup screen" aria-live="polite">
+        <div className="boot-shell">
+          <div className="boot-lights" aria-hidden="true"><i /><i /><i /></div>
+          <div className="boot-display">
+            <div className="boot-grid" aria-hidden="true" />
+            <div className="boot-reticle" aria-hidden="true"><span /></div>
+            <p className="boot-kicker">OAK RESEARCH SYSTEM</p>
+            <h1>POKÉDEX</h1>
+            <p className="boot-status">{bootState === "booting" ? "INITIALIZING REGIONAL DATABASE…" : "FIELD UNIT · MK. II"}</p>
+            {bootState === "booting" && <div className="boot-progress" aria-hidden="true"><i /></div>}
+            {bootState === "idle" && <button className="power-button" onClick={powerOn}><span aria-hidden="true">◉</span> POWER ON</button>}
+          </div>
+          <p className="boot-serial">UNIT 025 · KANTO / JOHTO</p>
+        </div>
+      </section>}
       {/* Persistent tools: project identity, search, and generation label. */}
       <header className="topbar">
         <a className="brand" href="#top" aria-label={`${region.name} Pokédex home`}>

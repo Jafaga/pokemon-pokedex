@@ -9,6 +9,42 @@ button,input { font:inherit; }
 button,a { -webkit-tap-highlight-color:transparent; }
 .eyebrow { font-family:var(--font-geist-mono); font-size:10px; letter-spacing:.18em; color:var(--muted); font-weight:700; }
 
+/* Full-screen device startup. Sound begins from the explicit power control so
+   it is allowed by desktop and mobile browser autoplay policies. */
+.boot-screen { position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:#181915;color:#eef5db;overflow:hidden; }
+.boot-screen.ready { pointer-events:none;opacity:0; }
+.boot-screen:before { content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(164,210,105,.12),transparent 36%),repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px); }
+.boot-shell { width:min(620px,100%);position:relative;padding:12px;border:1px solid #4e5145;background:#262821;box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 0 0 5px #20221c; }
+.boot-lights { height:28px;display:flex;align-items:center;gap:7px;padding:0 7px; }
+.boot-lights i { width:7px;height:7px;border-radius:50%;background:#45483d;box-shadow:0 0 0 1px #111; }
+.boot-lights i:first-child { width:12px;height:12px;background:#9ed755;box-shadow:0 0 12px rgba(158,215,85,.65); }
+.boot-screen.booting .boot-lights i:nth-child(2) { animation:bootBlink .32s steps(1) 2; }
+.boot-screen.booting .boot-lights i:nth-child(3) { animation:bootBlink .32s .3s steps(1) 2; }
+.boot-display { min-height:360px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border:2px solid #10110e;background:#17241b;color:#b9ee85;box-shadow:inset 0 0 45px rgba(0,0,0,.72),0 0 0 5px #3a3d33; }
+.boot-display:after { content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(208,255,170,.1),transparent);transform:translateX(-120%); }
+.booting .boot-display:after { animation:bootScan 1.3s .15s ease-in-out; }
+.boot-grid { position:absolute;inset:0;opacity:.13;background-image:linear-gradient(rgba(185,238,133,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(185,238,133,.4) 1px,transparent 1px);background-size:28px 28px; }
+.boot-reticle { position:absolute;width:230px;height:230px;border:1px solid rgba(185,238,133,.2);border-radius:50%; }
+.boot-reticle:before,.boot-reticle:after { content:"";position:absolute;background:rgba(185,238,133,.18); }
+.boot-reticle:before { width:1px;height:270px;left:50%;top:-20px; }.boot-reticle:after { height:1px;width:270px;top:50%;left:-20px; }
+.boot-reticle span { position:absolute;inset:42px;border:1px dashed rgba(185,238,133,.28);border-radius:50%; }
+.booting .boot-reticle { animation:bootRotate 2s linear; }
+.boot-kicker,.boot-status,.boot-serial { position:relative;margin:0;font:8px var(--font-geist-mono);letter-spacing:.2em; }
+.boot-display h1 { position:relative;margin:8px 0 11px;font:700 clamp(42px,10vw,76px)/1 var(--font-geist-mono);letter-spacing:.12em;text-shadow:0 0 18px rgba(185,238,133,.38); }
+.boot-status { min-height:10px;color:#7caa62; }
+.power-button { position:relative;margin-top:42px;border:1px solid #7fab5e;background:rgba(185,238,133,.07);color:#c9f4a1;padding:12px 19px;font:9px var(--font-geist-mono);letter-spacing:.15em;cursor:pointer;box-shadow:0 0 16px rgba(158,215,85,.08); }
+.power-button:hover,.power-button:focus-visible { background:#b9ee85;color:#17241b;outline:none;box-shadow:0 0 22px rgba(185,238,133,.28); }
+.power-button span { margin-right:8px; }
+.boot-progress { position:relative;width:min(280px,65%);height:4px;margin-top:42px;background:#30412b;overflow:hidden; }
+.boot-progress i { display:block;height:100%;background:#b9ee85;box-shadow:0 0 10px #b9ee85;animation:bootLoad 1.8s ease-out forwards; }
+.boot-serial { padding:15px 8px 4px;color:#777b69;text-align:right; }
+.booting { animation:bootExit .45s 1.78s ease-in forwards; }
+@keyframes bootBlink { 50% { background:#d4ee79;box-shadow:0 0 10px #d4ee79; } }
+@keyframes bootScan { to { transform:translateX(120%); } }
+@keyframes bootRotate { to { transform:rotate(180deg); } }
+@keyframes bootLoad { from { width:0; } to { width:100%; } }
+@keyframes bootExit { to { opacity:0;visibility:hidden; } }
+
 /* Sticky header, branding, search field, and game-edition marker. */
 .topbar { height:76px; display:grid; grid-template-columns:250px minmax(260px,520px) 1fr; align-items:center; gap:40px; border-bottom:1px solid var(--line); padding:0 34px; position:sticky; top:0; z-index:20; background:rgba(246,243,233,.96); backdrop-filter:blur(14px); }
 .brand { color:var(--ink); text-decoration:none; display:flex; align-items:center; gap:7px; letter-spacing:.12em; font-size:12px; }
@@ -109,4 +145,4 @@ footer a { color:var(--ink); }
 @media (max-width:520px) { .grid{grid-template-columns:repeat(3,1fr)}.poke-card{padding:6px}.poke-card strong{font-size:9px}.hero-image{height:250px}h1{font-size:30px}.filters{margin-right:-18px}.facts{grid-template-columns:1fr 1fr}.facts div:first-child{grid-column:1/-1} }
 
 /* Respect the operating system's reduced-motion accessibility preference. */
-@media (prefers-reduced-motion:reduce) { *{scroll-behavior:auto!important;transition:none!important} }
+@media (prefers-reduced-motion:reduce) { *{scroll-behavior:auto!important;transition:none!important}.booting,.booting .boot-display:after,.booting .boot-reticle,.boot-progress i{animation-duration:.01ms!important;animation-delay:0s!important} }
