@@ -1,6 +1,6 @@
-# Kanto Pokédex
+# Pokémon Pokédex
 
-An interactive field guide to all 151 Pokémon from the original **Pokémon Red, Blue, and Yellow** games. Browse the complete Kanto index, search by name or Pokédex number, filter by type, inspect stats and abilities, and play each Pokémon's cry.
+An interactive field guide to Pokémon found from the original **Pokémon Red, Blue, and Yellow** games, and **Pokémon Gold, Silver and Crystal**. Browse the complete Kanto and Johto index, search by name or Pokédex number, filter by type, inspect stats and abilities, and play each Pokémon's cry.
 
 ## Live app
 
@@ -11,7 +11,7 @@ The Vercel project is connected to this GitHub repository. Merges into `main` au
 
 ## Features
 
-- Complete National Pokédex entries **#001–#151**
+- Complete National Pokédex entries **#001–#251**
 - Search by Pokémon name or Pokédex number
 - Type filters for quick browsing
 - Original pixel sprites in the index
