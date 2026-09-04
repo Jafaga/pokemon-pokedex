@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Design tokens and shared browser defaults. */
-:root { --ink:#25251f; --muted:#77766a; --paper:#f6f3e9; --line:#d8d3c5; --red:#c63d36; --yellow:#e6b74c; --font-geist-sans:Arial,Helvetica,sans-serif; --font-geist-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace; }
+:root { --ink:#25251f; --muted:#77766a; --paper:#f6f3e9; --line:#d8d3c5; --red:#c63d36; --accent-soft:#ead1cd; --yellow:#e6b74c; --font-geist-sans:Arial,Helvetica,sans-serif; --font-geist-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-geist-sans),Arial,sans-serif; }
@@ -20,7 +20,7 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .search input { border:0; outline:0; background:transparent; flex:1; font-size:13px; }
 .search kbd { color:#999688; background:#f6f3e9; border:1px solid #d8d3c5; border-radius:3px; padding:2px 6px; font-size:10px; }
 .edition { justify-self:end; font-family:var(--font-geist-mono); font-size:9px; letter-spacing:.12em; display:flex; gap:9px; align-items:center; }
-.edition i { width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px #ead1cd; }
+.edition i { width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px var(--accent-soft); }
 .edition span { background:var(--ink); color:var(--paper); padding:5px 7px; border-radius:2px; }
 
 /* Three-column desktop shell and the Oak Research Lab navigation rail. */
@@ -42,6 +42,11 @@ button,a { -webkit-tap-highlight-color:transparent; }
 h1,h2 { font-family:Georgia,"Times New Roman",serif; margin:4px 0 0; font-weight:600; }
 h1 { font-size:35px; letter-spacing:-.03em; }
 .count { font:11px var(--font-geist-mono); color:var(--muted); padding-bottom:4px; }
+.region-switcher { display:grid;grid-template-columns:repeat(2,minmax(110px,1fr));gap:7px;margin:17px 0 2px;padding-bottom:14px;border-bottom:1px solid var(--line); }
+.region-switcher button { border:1px solid var(--line);background:rgba(255,255,255,.2);color:var(--muted);padding:10px 13px;text-align:left;text-transform:uppercase;font:600 11px var(--font-geist-sans);letter-spacing:.08em;cursor:pointer;transition:.18s ease; }
+.region-switcher button span { display:block;font:7px var(--font-geist-mono);letter-spacing:.13em;margin-bottom:3px; }
+.region-switcher button:hover { border-color:var(--red);color:var(--ink); }
+.region-switcher button.active { background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 5px 12px color-mix(in srgb,var(--red) 20%,transparent); }
 .filters { display:flex; gap:6px; overflow:auto; padding:17px 0 12px; }
 .filters button { border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:20px; padding:6px 11px; text-transform:uppercase; font:8px var(--font-geist-mono); letter-spacing:.08em; cursor:pointer; }
 .filters button.chosen,.filters button:hover { background:var(--ink); color:#fff; border-color:var(--ink); }
