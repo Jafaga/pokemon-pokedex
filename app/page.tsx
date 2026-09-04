@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // These types describe only the PokéAPI fields the interface reads. Keeping the
 // shapes small makes it easier to see which API data drives each screen section.
@@ -80,42 +80,21 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bootState, setBootState] = useState<"idle" | "booting" | "ready">("idle");
+  const introAudio = useRef<HTMLAudioElement>(null);
   const region = regions[regionKey];
 
-  // A brief Web Audio sequence gives the boot screen its own original device
-  // sound without requiring a copyrighted audio file or an extra download.
+  // Browser autoplay rules require the intro to begin from the power button.
+  // The audio element remains mounted after the overlay leaves, so the supplied
+  // theme can finish naturally without looping or holding up the Pokédex.
   const powerOn = () => {
     if (bootState !== "idle") return;
     setBootState("booting");
-
-    try {
-      const audio = new AudioContext();
-      const master = audio.createGain();
-      master.gain.setValueAtTime(0.0001, audio.currentTime);
-      master.gain.exponentialRampToValueAtTime(0.16, audio.currentTime + 0.03);
-      master.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 1.55);
-      master.connect(audio.destination);
-
-      [196, 294, 392, 587, 784].forEach((frequency, index) => {
-        const oscillator = audio.createOscillator();
-        const gain = audio.createGain();
-        const start = audio.currentTime + index * 0.16;
-        oscillator.type = index < 3 ? "square" : "sine";
-        oscillator.frequency.setValueAtTime(frequency, start);
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(index === 4 ? 0.38 : 0.22, start + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + (index === 4 ? 0.55 : 0.12));
-        oscillator.connect(gain).connect(master);
-        oscillator.start(start);
-        oscillator.stop(start + (index === 4 ? 0.58 : 0.14));
-      });
-
-      window.setTimeout(() => audio.close(), 1800);
-    } catch {
-      // The visual boot sequence still completes if Web Audio is unavailable.
+    if (introAudio.current) {
+      introAudio.current.volume = 0.22;
+      introAudio.current.currentTime = 0;
+      introAudio.current.play().catch(() => undefined);
     }
-
-    window.setTimeout(() => setBootState("ready"), 2100);
+    window.setTimeout(() => setBootState("ready"), 2600);
   };
 
   const switchRegion = (next: RegionKey) => {
@@ -181,19 +160,31 @@ export default function Home() {
 
   return (
     <main style={{ "--red": region.accent, "--accent-soft": region.accentSoft } as React.CSSProperties}>
+      {/* The supplied intro is instrumental background music, so no captions apply. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio ref={introAudio} src="/pokemon_intro.mp3" preload="auto" aria-hidden="true" />
       {bootState !== "ready" && <section className={`boot-screen ${bootState}`} aria-label="Pokédex startup screen" aria-live="polite">
-        <div className="boot-shell">
-          <div className="boot-lights" aria-hidden="true"><i /><i /><i /></div>
-          <div className="boot-display">
-            <div className="boot-grid" aria-hidden="true" />
-            <div className="boot-reticle" aria-hidden="true"><span /></div>
-            <p className="boot-kicker">OAK RESEARCH SYSTEM</p>
-            <h1>POKÉDEX</h1>
-            <p className="boot-status">{bootState === "booting" ? "INITIALIZING REGIONAL DATABASE…" : "FIELD UNIT · MK. II"}</p>
-            {bootState === "booting" && <div className="boot-progress" aria-hidden="true"><i /></div>}
-            {bootState === "idle" && <button className="power-button" onClick={powerOn}><span aria-hidden="true">◉</span> POWER ON</button>}
+        <div className="dex-device">
+          <div className="dex-top" aria-hidden="true">
+            <div className="dex-lens"><i /></div>
+            <div className="dex-lights"><i /><i /><i /></div>
+            <span className="dex-ridge" />
           </div>
-          <p className="boot-serial">UNIT 025 · KANTO / JOHTO</p>
+          <div className="dex-body">
+            <div className="dex-screen-bezel">
+              <div className="dex-speakers" aria-hidden="true"><i /><i /></div>
+              <div className="boot-display">
+                <div className="boot-grid" aria-hidden="true" />
+                <div className="pokeball-scan" aria-hidden="true"><i /></div>
+                <p className="boot-kicker">PROF. OAK&apos;S</p>
+                <h1>POKÉDEX</h1>
+                <p className="boot-status">{bootState === "booting" ? "GOTTA CATCH 'EM ALL!" : "KANTO + JOHTO EDITION"}</p>
+                {bootState === "booting" && <div className="boot-progress" aria-hidden="true"><i /></div>}
+                {bootState === "idle" && <button className="power-button" onClick={powerOn}><span aria-hidden="true">▶</span> START</button>}
+              </div>
+              <div className="dex-controls" aria-hidden="true"><i /><span>POKÉDEX 025</span><b /></div>
+            </div>
+          </div>
         </div>
       </section>}
       {/* Persistent tools: project identity, search, and generation label. */}

@@ -9,39 +9,38 @@ button,input { font:inherit; }
 button,a { -webkit-tap-highlight-color:transparent; }
 .eyebrow { font-family:var(--font-geist-mono); font-size:10px; letter-spacing:.18em; color:var(--muted); font-weight:700; }
 
-/* Full-screen device startup. Sound begins from the explicit power control so
-   it is allowed by desktop and mobile browser autoplay policies. */
-.boot-screen { position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:#181915;color:#eef5db;overflow:hidden; }
-.boot-screen.ready { pointer-events:none;opacity:0; }
-.boot-screen:before { content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(164,210,105,.12),transparent 36%),repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px); }
-.boot-shell { width:min(620px,100%);position:relative;padding:12px;border:1px solid #4e5145;background:#262821;box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 0 0 5px #20221c; }
-.boot-lights { height:28px;display:flex;align-items:center;gap:7px;padding:0 7px; }
-.boot-lights i { width:7px;height:7px;border-radius:50%;background:#45483d;box-shadow:0 0 0 1px #111; }
-.boot-lights i:first-child { width:12px;height:12px;background:#9ed755;box-shadow:0 0 12px rgba(158,215,85,.65); }
-.boot-screen.booting .boot-lights i:nth-child(2) { animation:bootBlink .32s steps(1) 2; }
-.boot-screen.booting .boot-lights i:nth-child(3) { animation:bootBlink .32s .3s steps(1) 2; }
-.boot-display { min-height:360px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border:2px solid #10110e;background:#17241b;color:#b9ee85;box-shadow:inset 0 0 45px rgba(0,0,0,.72),0 0 0 5px #3a3d33; }
-.boot-display:after { content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(208,255,170,.1),transparent);transform:translateX(-120%); }
-.booting .boot-display:after { animation:bootScan 1.3s .15s ease-in-out; }
-.boot-grid { position:absolute;inset:0;opacity:.13;background-image:linear-gradient(rgba(185,238,133,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(185,238,133,.4) 1px,transparent 1px);background-size:28px 28px; }
-.boot-reticle { position:absolute;width:230px;height:230px;border:1px solid rgba(185,238,133,.2);border-radius:50%; }
-.boot-reticle:before,.boot-reticle:after { content:"";position:absolute;background:rgba(185,238,133,.18); }
-.boot-reticle:before { width:1px;height:270px;left:50%;top:-20px; }.boot-reticle:after { height:1px;width:270px;top:50%;left:-20px; }
-.boot-reticle span { position:absolute;inset:42px;border:1px dashed rgba(185,238,133,.28);border-radius:50%; }
-.booting .boot-reticle { animation:bootRotate 2s linear; }
-.boot-kicker,.boot-status,.boot-serial { position:relative;margin:0;font:8px var(--font-geist-mono);letter-spacing:.2em; }
-.boot-display h1 { position:relative;margin:8px 0 11px;font:700 clamp(42px,10vw,76px)/1 var(--font-geist-mono);letter-spacing:.12em;text-shadow:0 0 18px rgba(185,238,133,.38); }
-.boot-status { min-height:10px;color:#7caa62; }
-.power-button { position:relative;margin-top:42px;border:1px solid #7fab5e;background:rgba(185,238,133,.07);color:#c9f4a1;padding:12px 19px;font:9px var(--font-geist-mono);letter-spacing:.15em;cursor:pointer;box-shadow:0 0 16px rgba(158,215,85,.08); }
-.power-button:hover,.power-button:focus-visible { background:#b9ee85;color:#17241b;outline:none;box-shadow:0 0 22px rgba(185,238,133,.28); }
+/* Red field-unit startup, inspired by the animated Pokédex device. */
+.boot-screen { position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 40%,#f5e9d3,#d8c5a5);color:#f8f3df;overflow:hidden; }
+.boot-screen:before { content:"";position:absolute;inset:0;opacity:.22;background-image:radial-gradient(#795f3c 1px,transparent 1px);background-size:16px 16px; }
+.dex-device { width:min(570px,94vw);position:relative;filter:drop-shadow(0 35px 32px rgba(66,35,24,.32));transform:rotate(-1deg); }
+.dex-top { height:105px;position:relative;display:flex;align-items:flex-start;padding:18px 28px;border:4px solid #54211f;border-bottom:0;border-radius:28px 28px 0 0;background:linear-gradient(145deg,#ee4b44,#a51f27);box-shadow:inset 8px 8px 0 rgba(255,255,255,.12); }
+.dex-lens { width:70px;height:70px;border:7px solid #f3eee1;border-radius:50%;display:grid;place-items:center;background:#11374b;box-shadow:0 0 0 4px #57211f,inset 0 0 14px #071b28; }
+.dex-lens i { width:44px;height:44px;border-radius:50%;display:block;background:radial-gradient(circle at 35% 28%,#d8fbff 0 9%,#4ed1ed 10% 32%,#1680b1 60%,#0a466b);box-shadow:0 0 18px #70dff3; }
+.dex-lights { display:flex;gap:12px;margin:8px 0 0 25px; }.dex-lights i { width:17px;height:17px;border:3px solid #622521;border-radius:50%;background:#791f24;box-shadow:inset 2px 2px rgba(255,255,255,.22); }
+.dex-lights i:nth-child(1){background:#f7d549}.dex-lights i:nth-child(2){background:#77b64b}.dex-lights i:nth-child(3){background:#ee6c55}
+.dex-ridge { position:absolute;right:-4px;bottom:0;width:52%;height:35px;background:#8f1923;border:4px solid #54211f;border-bottom:0;clip-path:polygon(16% 0,100% 0,100% 100%,0 100%); }
+.dex-body { padding:0 25px 27px;border:4px solid #54211f;border-top:0;border-radius:0 0 30px 30px;background:linear-gradient(145deg,#df3837,#9e1e27);box-shadow:inset 9px 0 rgba(255,255,255,.07); }
+.dex-screen-bezel { padding:22px 24px 15px;background:#d9d9cd;border:4px solid #54211f;clip-path:polygon(0 0,100% 0,100% 88%,92% 100%,0 100%);box-shadow:inset 7px 7px rgba(255,255,255,.45); }
+.dex-speakers { height:17px;display:flex;justify-content:center;gap:11px; }.dex-speakers i { width:8px;height:8px;border-radius:50%;background:#c83236;border:1px solid #722; }
+.boot-display { min-height:300px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border:5px solid #343836;border-radius:8px;background:#95c9c0;color:#183c3d;box-shadow:inset 0 0 38px rgba(20,62,62,.32); }
+.boot-display:after { content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);transform:translateX(-120%); }.booting .boot-display:after { animation:bootScan 1.5s .2s ease-in-out; }
+.boot-grid { position:absolute;inset:0;opacity:.13;background-image:linear-gradient(#204f4f 1px,transparent 1px),linear-gradient(90deg,#204f4f 1px,transparent 1px);background-size:20px 20px; }
+.pokeball-scan { position:absolute;width:205px;height:205px;border:10px solid rgba(26,72,72,.1);border-radius:50%;overflow:hidden; }.pokeball-scan:before { content:"";position:absolute;left:0;right:0;top:45%;height:10%;background:rgba(26,72,72,.1); }.pokeball-scan i { position:absolute;width:48px;height:48px;border:9px solid rgba(26,72,72,.12);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);background:#95c9c0; }
+.booting .pokeball-scan { animation:pokeballPulse .55s ease-in-out 3; }
+.boot-kicker,.boot-status { position:relative;margin:0;font:700 9px var(--font-geist-mono);letter-spacing:.2em; }
+.boot-display h1 { position:relative;margin:9px 0 12px;color:#f4d544;-webkit-text-stroke:2px #275795;font:900 clamp(40px,10vw,72px)/1 Arial,sans-serif;letter-spacing:-.06em;transform:skew(-5deg);text-shadow:3px 4px 0 #17396e; }
+.boot-status { min-height:12px;color:#2b5c59; }
+.power-button { position:relative;margin-top:37px;border:3px solid #153f42;border-radius:22px;background:#e9d747;color:#183c3d;padding:10px 22px;font:800 10px var(--font-geist-mono);letter-spacing:.15em;cursor:pointer;box-shadow:0 4px 0 #163c3e; }
+.power-button:hover,.power-button:focus-visible { transform:translateY(2px);box-shadow:0 2px 0 #163c3e;outline:none; }
 .power-button span { margin-right:8px; }
-.boot-progress { position:relative;width:min(280px,65%);height:4px;margin-top:42px;background:#30412b;overflow:hidden; }
-.boot-progress i { display:block;height:100%;background:#b9ee85;box-shadow:0 0 10px #b9ee85;animation:bootLoad 1.8s ease-out forwards; }
-.boot-serial { padding:15px 8px 4px;color:#777b69;text-align:right; }
-.booting { animation:bootExit .45s 1.78s ease-in forwards; }
-@keyframes bootBlink { 50% { background:#d4ee79;box-shadow:0 0 10px #d4ee79; } }
+.boot-progress { position:relative;width:min(270px,65%);height:8px;margin-top:38px;border:2px solid #214d4c;background:#659b94;overflow:hidden; }.boot-progress i { display:block;height:100%;background:#f4dc45;animation:bootLoad 2s ease-out forwards; }
+.dex-controls { height:38px;display:flex;align-items:end;justify-content:space-between;color:#55594f;font:700 7px var(--font-geist-mono);letter-spacing:.14em; }
+.dex-controls i { width:24px;height:24px;border-radius:50%;background:#bc2730;border:2px solid #652127; }.dex-controls b { width:55px;height:8px;border-radius:6px;background:repeating-linear-gradient(0deg,#555 0 1px,transparent 1px 3px); }
+.booting { animation:bootExit .5s 2.1s ease-in forwards; }
+.booting .dex-lens i { animation:lensFlash .45s ease-in-out 4; }
+@keyframes lensFlash { 50% { filter:brightness(1.8);box-shadow:0 0 35px #b9f6ff; } }
+@keyframes pokeballPulse { 50% { transform:scale(1.08);opacity:.55; } }
 @keyframes bootScan { to { transform:translateX(120%); } }
-@keyframes bootRotate { to { transform:rotate(180deg); } }
 @keyframes bootLoad { from { width:0; } to { width:100%; } }
 @keyframes bootExit { to { opacity:0;visibility:hidden; } }
 
