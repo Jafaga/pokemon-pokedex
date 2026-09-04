@@ -40,6 +40,8 @@ Pokémon and Pokémon character names are trademarks of Nintendo, Game Freak, an
 
 The app keeps the original 151-species roster locally so the index appears immediately. When an entry is opened, the browser requests two PokéAPI resources in parallel:
 
+This also utilizes the PokeAPI website to fetch all data in  regards to the Pokémon sprite, type, and details.  
+
 1. `/api/v2/pokemon/{id}` supplies types, abilities, measurements, stats, sprites, artwork, and cries.
 2. `/api/v2/pokemon-species/{id}` supplies the genus, habitat, growth rate, capture rate, and game-specific flavor text.
 
