@@ -126,7 +126,7 @@ export default function Home() {
   const [showShiny, setShowShiny] = useState(false);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [visibleLimit, setVisibleLimit] = useState(24);
+  const [activeNav, setActiveNav] = useState<"pokedex" | "details" | "favorites" | "about">("pokedex");
   const [moveDetails, setMoveDetails] = useState<Record<string, MoveDetail>>({});
   const [evolution, setEvolution] = useState<EvolutionNode | null>(null);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
@@ -160,7 +160,8 @@ export default function Home() {
     setMoveVersion(next === "kanto" ? "red-blue" : "gold-silver");
     setDexVersion(next === "kanto" ? "red" : "gold");
     setShowShiny(false);
-    setVisibleLimit(24);
+    setFavoritesOnly(false);
+    setActiveNav("pokedex");
     setPokemon(null);
     setSpecies(null);
     loadPokemon(nextRegion.start);
@@ -212,6 +213,21 @@ export default function Home() {
     return next;
   });
 
+  const navigateSidebar = (destination: "pokedex" | "details" | "favorites" | "about") => {
+    setActiveNav(destination);
+    if (destination === "pokedex" || destination === "favorites") {
+      setFavoritesOnly(destination === "favorites");
+      setQuery("");
+      setFilter("all");
+    }
+    window.requestAnimationFrame(() => {
+      if (destination === "details") {
+        document.querySelector<HTMLElement>(".detail")?.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      document.getElementById(destination === "pokedex" || destination === "favorites" ? "index" : destination)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
   // Pikachu is the opening entry. Arrow keys provide quick desktop navigation,
   // but are ignored while a visitor is typing in the search field.
   useEffect(() => { loadPokemon(25); }, [loadPokemon]);
@@ -231,8 +247,6 @@ export default function Home() {
     const typeMatch = filter === "all" || (typeHints[p.id] || []).includes(filter) || (p.id === selected && pokemon?.types.some(t => t.type.name === filter));
     return searchMatch && typeMatch && (!favoritesOnly || favorites.has(p.id));
   }), [query, filter, selected, pokemon, region, favoritesOnly, favorites]);
-  const displayed = visible.slice(0, visibleLimit);
-
   // Flavor text follows the chosen cartridge, with an English fallback for the
   // handful of species/version combinations that do not contain a unique entry.
   const preferredVersions = regionKey === "kanto" ? ["red", "blue", "yellow"] : ["gold", "silver", "crystal"];
@@ -330,7 +344,7 @@ export default function Home() {
         <a className="brand" href="#top" aria-label={`${region.name} Pokédex home`}>
           <span className="brand-ball"><i /></span><span>{region.name.toUpperCase()}</span><b>POKÉDEX</b>
         </a>
-        <label className="search"><span>⌕</span><input value={query} onChange={e => { setQuery(e.target.value); setVisibleLimit(24); }} placeholder="Search name or number..." aria-label="Search Pokémon"/><kbd>/</kbd></label>
+        <label className="search"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search name or number..." aria-label="Search Pokémon"/><kbd>/</kbd></label>
         <div className="edition"><i /> {region.editions} <span>{region.generation}</span></div>
       </header>
 
@@ -339,25 +353,25 @@ export default function Home() {
         <aside className="rail">
           <div><span className="eyebrow">REGION</span><strong>{region.name.toUpperCase()}</strong><small>{pad(region.start)}—{pad(region.end)}</small></div>
           <nav aria-label="Pokédex sections">
-            <a className={!favoritesOnly ? "active" : ""} href="#index"><b>⌗</b><span>Pokédex</span></a>
-            <a href="#details"><b>◫</b><span>Details</span></a>
-            <button className={favoritesOnly ? "active" : ""} onClick={() => { setFavoritesOnly(value => !value); setVisibleLimit(24); }}><b>★</b><span>Favorites</span></button>
-            <a href="#about"><b>?</b><span>About</span></a>
+            <button className={activeNav === "pokedex" ? "active" : ""} onClick={() => navigateSidebar("pokedex")}><b>⌗</b><span>Pokédex</span></button>
+            <button className={activeNav === "details" ? "active" : ""} onClick={() => navigateSidebar("details")}><b>◫</b><span>Details</span></button>
+            <button className={activeNav === "favorites" ? "active" : ""} onClick={() => navigateSidebar("favorites")}><b>★</b><span>Favorites</span></button>
+            <button className={activeNav === "about" ? "active" : ""} onClick={() => navigateSidebar("about")}><b>?</b><span>About</span></button>
           </nav>
           <div className="rail-foot"><div className="mini-ball"/><span>OAK<br/>RESEARCH<br/>LAB</span></div>
         </aside>
 
         {/* Searchable and filterable index of all 151 Kanto Pokémon. */}
         <section className="index" id="index">
-          <div className="section-head"><div><span className="eyebrow">{favoritesOnly ? "SAVED SPECIMENS" : "REGIONAL INDEX"}</span><h1>{favoritesOnly ? "Favorites" : `${region.name} Pokémon`}</h1></div><span className="count">{displayed.length} / {visible.length}</span></div>
+          <div className="section-head"><div><span className="eyebrow">{favoritesOnly ? "SAVED SPECIMENS" : "REGIONAL INDEX"}</span><h1>{favoritesOnly ? "Favorites" : `${region.name} Pokémon`}</h1></div><span className="count">{favoritesOnly ? `${visible.length} SAVED` : `${visible.length} / ${region.names.length}`}</span></div>
           <div className="region-switcher" role="group" aria-label="Choose a Pokémon region">
             {(Object.keys(regions) as RegionKey[]).map(key => <button key={key} className={regionKey === key ? "active" : ""} onClick={() => switchRegion(key)} aria-pressed={regionKey === key}><span>{regions[key].generation}</span>{regions[key].name}</button>)}
           </div>
           <div className="filters" role="group" aria-label="Filter by type">
-            {["all","grass","fire","water","electric","psychic","ghost"].map(t => <button key={t} className={filter === t ? "chosen" : ""} onClick={() => { setFilter(t); setVisibleLimit(24); }}>{t}</button>)}
+            {["all","grass","fire","water","electric","psychic","ghost"].map(t => <button key={t} className={filter === t ? "chosen" : ""} onClick={() => setFilter(t)}>{t}</button>)}
           </div>
           <div className="grid">
-            {displayed.map(p => <button key={p.id} className={`poke-card ${selected === p.id ? "selected" : ""}`} onClick={() => loadPokemon(p.id)} aria-label={`View ${format(p.name)}, number ${p.id}`}>
+            {visible.map(p => <button key={p.id} className={`poke-card ${selected === p.id ? "selected" : ""}`} onClick={() => loadPokemon(p.id)} aria-label={`View ${format(p.name)}, number ${p.id}`}>
               <span className="number">#{pad(p.id)}</span>
               {favorites.has(p.id) && <span className="favorite-mark" aria-label="Favorite">★</span>}
               <img src={sprite(p.id)} alt="" loading="lazy"/>
@@ -366,7 +380,6 @@ export default function Home() {
             </button>)}
             {!visible.length && <div className="no-results">No Pokémon found in this field guide.</div>}
           </div>
-          {displayed.length < visible.length && <button className="load-more" onClick={() => setVisibleLimit(limit => limit + 24)}>LOAD 24 MORE <span>{visible.length - displayed.length} REMAINING</span></button>}
         </section>
 
         {/* Live specimen file populated by the two PokéAPI responses. */}

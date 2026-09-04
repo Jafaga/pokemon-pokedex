@@ -99,7 +99,6 @@ h1 { font-size:35px; letter-spacing:-.03em; }
 .poke-card:has(.favorite-mark) .dot { display:none; }
 .poke-card.selected .dot { background:var(--red); }
 .no-results { grid-column:1/-1; text-align:center; padding:70px 20px; color:var(--muted); }
-.load-more { width:100%;margin-top:13px;border:1px solid var(--line);background:transparent;padding:12px;color:var(--ink);cursor:pointer;font:8px var(--font-geist-mono);letter-spacing:.1em }.load-more span{margin-left:8px;color:var(--muted)}.load-more:hover{border-color:var(--red);color:var(--red)}
 
 /* Selected Pokémon specimen panel: artwork, measurements, stats, and paging. */
 .detail { background:color-mix(in srgb,var(--specimen) 9%,#ebe6d9);border-left:3px solid color-mix(in srgb,var(--specimen) 55%,var(--line));min-height:calc(100vh - 76px);padding:30px 32px 26px;position:sticky;top:76px;height:calc(100vh - 76px);overflow:auto;transition:background .3s,border-color .3s; }
