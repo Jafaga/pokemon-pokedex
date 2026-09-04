@@ -12,6 +12,14 @@ type Pokemon = {
   types: { type: { name: string } }[];
   stats: { base_stat: number; stat: { name: string } }[];
   abilities: { ability: { name: string }; is_hidden: boolean }[];
+  moves: {
+    move: { name: string };
+    version_group_details: {
+      level_learned_at: number;
+      move_learn_method: { name: string };
+      version_group: { name: string };
+    }[];
+  }[];
   sprites: { front_default: string; other?: { "official-artwork"?: { front_default: string } } };
   cries?: { latest?: string; legacy?: string };
 };
@@ -40,6 +48,11 @@ const regions = {
 } as const;
 
 type RegionKey = keyof typeof regions;
+
+const gameOptions = {
+  kanto: [{ value: "red-blue", label: "Red / Blue" }, { value: "yellow", label: "Yellow" }],
+  johto: [{ value: "gold-silver", label: "Gold / Silver" }, { value: "crystal", label: "Crystal" }]
+} as const;
 
 // Type colors are shared by the detail-panel badges.
 const typeColors: Record<string, string> = {
@@ -77,6 +90,7 @@ export default function Home() {
   const [species, setSpecies] = useState<Species | null>(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [moveVersion, setMoveVersion] = useState("red-blue");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bootState, setBootState] = useState<"idle" | "booting" | "ready">("idle");
@@ -103,6 +117,7 @@ export default function Home() {
     setRegionKey(next);
     setQuery("");
     setFilter("all");
+    setMoveVersion(next === "kanto" ? "red-blue" : "gold-silver");
     setPokemon(null);
     setSpecies(null);
     loadPokemon(nextRegion.start);
@@ -150,6 +165,12 @@ export default function Home() {
     || species?.flavor_text_entries.find(x => x.language.name === "en");
   const genus = species?.genera.find(g => g.language.name === "en")?.genus;
   const total = pokemon?.stats.reduce((sum, s) => sum + s.base_stat, 0) || 0;
+  const movesForMethod = (method: string) => (pokemon?.moves.flatMap(entry => {
+    const detail = entry.version_group_details.find(item => item.version_group.name === moveVersion && item.move_learn_method.name === method);
+    return detail ? [{ name: entry.move.name, level: detail.level_learned_at }] : [];
+  }) || []).sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+  const levelMoves = movesForMethod("level-up");
+  const machineMoves = movesForMethod("machine");
 
   // Browsers can block audio until a user interacts with the page, which is why
   // cries are played only from the explicit speaker button.
@@ -238,6 +259,16 @@ export default function Home() {
             <div className="measurements"><div><span>HEIGHT</span><strong>{(pokemon.height / 10).toFixed(1)} m</strong></div><div><span>WEIGHT</span><strong>{(pokemon.weight / 10).toFixed(1)} kg</strong></div><div><span>HABITAT</span><strong>{format(species?.habitat?.name || "unknown")}</strong></div></div>
             <section className="stats"><div className="subhead"><h3>BASE STATS</h3><span>TOTAL <b>{total}</b></span></div>{pokemon.stats.map(s => <div className="stat" key={s.stat.name}><span>{s.stat.name.replace("special-attack","sp. atk").replace("special-defense","sp. def")}</span><b>{s.base_stat}</b><i><em style={{ width: `${Math.min(100, s.base_stat / 1.6)}%` }}/></i></div>)}</section>
             <section className="facts"><div><span>ABILITIES</span><strong>{pokemon.abilities.map(a => format(a.ability.name)).join(" · ")}</strong></div><div><span>GROWTH</span><strong>{format(species?.growth_rate.name || "—")}</strong></div><div><span>CAPTURE RATE</span><strong>{species?.capture_rate ?? "—"}</strong></div></section>
+            <section className="game-data">
+              <div className="subhead"><div><span className="eyebrow">GAME DATA</span><h3>MOVES LEARNED</h3></div><label>EDITION<select value={moveVersion} onChange={event => setMoveVersion(event.target.value)}>{gameOptions[regionKey].map(game => <option key={game.value} value={game.value}>{game.label}</option>)}</select></label></div>
+              <div className="move-heading"><span>LEVEL</span><span>MOVE</span></div>
+              <div className="move-list">
+                {levelMoves.map((move, index) => <div className="move-row" key={`${move.name}-${move.level}-${index}`}><b>{move.level || "—"}</b><span>{format(move.name)}</span></div>)}
+                {!levelMoves.length && <p className="no-moves">No level-up moves listed for this edition.</p>}
+              </div>
+              <details className="machine-moves"><summary>TM / HM compatibility <span>{machineMoves.length}</span></summary><div className="machine-grid">{machineMoves.map(move => <span key={move.name}>{format(move.name)}</span>)}</div></details>
+              <p className="move-source">Version-specific move data from <a href="https://pokeapi.co" target="_blank" rel="noreferrer">PokéAPI</a>. Cross-reference the full learnset on <a href={`https://pokemondb.net/pokedex/${pokemon.name}/moves/${regionKey === "kanto" ? 1 : 2}`} target="_blank" rel="noreferrer">Pokémon Database</a>.</p>
+            </section>
             <div className="pager"><button onClick={() => loadPokemon(selected === region.start ? region.end : selected - 1)}>← <span>PREV</span></button><button onClick={() => loadPokemon(selected === region.end ? region.start : selected + 1)}><span>NEXT</span> →</button></div>
           </>}
         </aside>
